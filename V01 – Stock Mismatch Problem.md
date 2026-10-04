@@ -1,305 +1,255 @@
-# V01 – Stock Mismatch Problem? Fix It with ERPNext Stock Reconciliation
+# V01 (Revised) – Stock Mismatch Problem? Fix It with ERPNext Stock Reconciliation
 
-**Length:** ~14 minutes | **Demo company:** ABC Manufacturing Pvt. Ltd. | **Language:** Simple English (speak in Gujarati + English mix if you prefer; keep ERPNext terms in English)
+**Length:** ~13 minutes | **Demo company:** ABC Manufacturing Pvt. Ltd. | **Style:** Use case → ERPNext solution → live demo (story kept to under 1 minute)
 
-**Format:** 🎙 = what you say | 🖥 = what you do on screen
+**Format:** 🎙 = what you say | 🖥 = what you do on screen | 🏷 = on-screen tag
+
+**Retention rule for this version:** every demo step is tied back to the use case with a small on-screen tag (🏷 *Use case: 12 pieces issued, no entry* → *ERPNext: Material Issue*). The viewer always knows which problem the feature is solving.
 
 ---
 
 ## Before You Record
 
-### Demo Data to Prepare
+### Use Case Summary
+
+**Company:** ABC Manufacturing Pvt. Ltd. uses Steel Rod 10mm in production.
+**Problem:** The record says 100 pieces, but the shelf has 80. The 20 missing pieces came from three unrecorded movements:
+
+| Cause | Pieces | ERPNext document that prevents it |
+| --- | --- | --- |
+| Issued to production, no entry | 12 | Stock Entry: Material Issue |
+| Damaged, never recorded | 5 | Stock Entry: Material Issue (with reason) |
+| Moved to another rack, no transfer | 3 | Stock Entry: Material Transfer |
+
+### Demo Data
 
 | Item | Value |
 | --- | --- |
-| Company | ABC Manufacturing Pvt. Ltd. |
-| Warehouse | Main Store - ABC |
-| Item | Steel Rod 10mm (Stock UOM: Nos) |
+| Warehouses | Main Store - ABC, Rack B - ABC |
+| Item | Steel Rod 10mm (Nos, Maintain Stock on) |
 | Valuation rate | ₹500 per piece |
-| Opening stock | 60 Nos (via Stock Reconciliation, purpose: Opening Stock) |
-| Stock Entry (Material Receipt) | +40 Nos, so the system shows **100** |
-| Physical count (story) | **80** |
-| Expected difference | −20 Nos = −₹10,000 |
+| Opening stock | 60 Nos (Stock Reconciliation → Opening Stock) |
+| Material Receipt | +40 Nos → system shows **100** |
+| Physical count | **80** → difference −20 = −₹10,000 |
+| Prevention demo (new movements) | Issue 10 to production, Issue 2 damaged, Transfer 5 to Rack B |
+| Result after prevention demo | Main Store **68**, Rack B **5** (total 73 = ₹36,500) |
 | Reorder Level / Qty | 50 / 100 (Main Store) |
 
 ### Setup Checklist
 
 - [ ] Fresh site with ABC Manufacturing Pvt. Ltd. created
-- [ ] Item and warehouse **not** created yet (you create them live)
-- [ ] "Stock Adjustment" account exists (default in the chart of accounts)
-- [ ] Excel screenshot of a messy stock sheet ready for the intro
+- [ ] Item and both warehouses **not** created yet (create live; or create Rack B beforehand to save time)
+- [ ] Stock Adjustment account available (default in the chart of accounts)
+- [ ] Solution-map slide ready (see Part 3)
+- [ ] The hook diagram ready (100 vs 80, with the three causes)
 - [ ] Browser zoom 110–125%, notifications off
-- [ ] Do a dry run once so you know the menu names in your version
+- [ ] Dry run once to confirm menu names and expense account on your version
 
 ---
 
 ## Part 1 – Hook (0:00–0:30)
 
-🖥 *Show a close-up of a stock sheet: system says 100, with a hand-written note "Physical: 80".*
+🖥 Hook diagram, revealed in steps: "System says 100" and "Shelf has 80" → red "20 missing, ₹10,000" → three red boxes → "Fix: Stock Reconciliation".
 
-🎙 "Your system says 100 items. But when you walk into the warehouse and count, there are only 80.
+🎙 "Your system says 100 items. But when you count the shelf, there are only 80.
 
-Where did the other 20 go? Who is responsible? And most importantly, how do you fix it, so it never surprises you again?
+Twenty pieces, worth ten thousand rupees, and nobody knows where they went.
 
-In this video, I'll show you exactly how ERPNext solves this problem, step by step."
+Material issued, damaged, or moved without any entry. This happens in almost every manufacturing and trading business.
 
----
-
-## Part 2 – Introduction (0:30–1:30)
-
-🖥 *Show your face or channel intro, then the title slide.*
-
-🎙 "Hello everyone, welcome to my channel. In this series, I explain real business problems and show how to solve them using ERPNext and other Frappe products.
-
-Today's problem: stock mismatch between your records and your warehouse.
-
-By the end of this video, you will learn:
-- Why stock mismatches happen
-- How ERPNext tracks stock warehouse by warehouse
-- How to correct the stock using Stock Reconciliation
-- How to set a Reorder Level so you get alerted before stock runs out
-- And how to read the Stock Ledger and Stock Balance reports
-
-If you are a business owner, a store manager, or someone learning ERPNext, this video is for you. Let's start."
+In this video, I'll show you how ERPNext fixes the gap, and how to make sure it never happens again."
 
 ---
 
-## Part 3 – The Business Story (1:30–3:00)
+## Part 2 – The Use Case in 45 Seconds (0:30–1:15)
 
-🖥 *Show the Excel sheet, a WhatsApp chat screenshot, and a paper register one after another.*
+🖥 Show a short slide: company name, item, and a table with the three causes.
 
-🎙 "Let me tell you a story. Imagine a company called ABC Manufacturing. They use steel rods in production.
+🎙 "Welcome to the channel. In this series, I take a real business problem and solve it with ERPNext and other Frappe products.
 
-The store keeper keeps stock in Excel. The purchase team gets the quantity on WhatsApp. The production team takes material and sometimes forgets to inform anyone.
+Today's use case: ABC Manufacturing uses steel rods in production. Their record says 100, but the shelf has 80.
 
-Now, a customer order arrives. The sales team checks the sheet and says, 'We have 100 steel rods, no problem.' They promise delivery.
+When we look at what happened, there are three causes. Twelve pieces went to production, with no entry. Five were damaged, and nobody recorded it. And three were moved to another rack, without a transfer entry.
 
-But when the production team goes to the shelf, only 80 are there. The order is delayed. The customer is unhappy. And the owner asks, 'Where did 20 rods go?'
+So the problem is not the rods. The problem is that the stock movement and the system entry did not happen together.
 
-This is not a rare problem. It happens in almost every business that does not control stock movements properly."
-
-### Why Mismatches Happen
-
-🎙 "There are five common reasons:
-1. Material is issued but never recorded.
-2. Material is received but entered late or entered twice.
-3. Wrong quantity typed during entry.
-4. Damage, theft, or wastage that nobody records.
-5. Stock is moved between locations without any transfer entry.
-
-The root cause is always the same: the physical movement and the system entry did not happen together."
+Now let's see what ERPNext gives us to solve this."
 
 ---
 
-## Part 4 – What the Solution Should Do (3:00–4:00)
+## Part 3 – The ERPNext Solution Map (1:15–2:45)
 
-🖥 *Show a simple diagram: Purchase → Warehouse → Production/Sales, with a "Stock Ledger" box in the middle.*
+🖥 Show the solution-map slide. Reveal one row at a time while you speak.
 
-🎙 "So what should a good system do?
+| Business need | ERPNext feature | Where |
+| --- | --- | --- |
+| Record every movement | Stock Entry (Material Receipt / Issue / Transfer) | Stock → Stock Entry |
+| Track stock location-wise | Warehouse | Stock → Warehouse |
+| Correct stock after a physical count, with accounting impact | Stock Reconciliation | Stock → Stock Reconciliation |
+| Alert before stock runs out | Reorder Level + Auto Material Request | Item → Reorder, Stock Settings |
+| Prove what happened | Stock Ledger, Stock Balance | Stock → Reports |
 
-First, every stock movement must create a record, whether it is a purchase, a sale, a transfer, or a production use.
+🎙 "Here is the complete solution in one slide. ERPNext solves this problem with five features.
 
-Second, stock must be tracked warehouse by warehouse, not just as one total number.
+One: Stock Entry. Every movement, whether it is a receipt, an issue, or a transfer, must be a document. This directly solves our twelve, five, and three pieces.
 
-Third, when you count the stock physically and find a difference, there must be a proper way to correct it, with the value recorded in accounts.
+Two: Warehouses. ERPNext tracks stock location by location, so Rack B is separate from Main Store.
 
-And fourth, the system should warn you before the stock runs out.
+Three: Stock Reconciliation. When the physical count differs from the system, you correct it through a document, and the value goes into your accounts automatically.
 
-ERPNext does all four. And for this, we use the Stock module of ERPNext."
+Four: Reorder Level. ERPNext warns you before the stock ends.
 
----
+And five: the Stock Ledger and Stock Balance reports. These give you proof for every movement.
 
-## Part 5 – Which Frappe Product (4:00–5:00)
+Behind all of this sits one thing: the Stock Ledger. Every stock movement creates an entry there. It is the single source of truth.
 
-🖥 *Open ERPNext, go to the Stock workspace.*
-
-🎙 "The product we will use today is ERPNext, specifically the Stock module.
-
-Here in the Stock workspace you can see everything: Items, Stock Entry, Stock Reconciliation, Warehouses, and all the stock reports.
-
-Behind all of this sits one important thing called the Stock Ledger. Every movement of stock, in or out, creates an entry in the Stock Ledger. This is the single source of truth.
-
-Now let's see it in action."
+Let's build this from scratch in ERPNext."
 
 ---
 
-## Part 6 – Live Demo (5:00–11:30)
+## Part 4 – Live Demo (2:45–11:45)
 
-### Step 1 – Create the Warehouse (5:00–5:45)
+### Step 1 – Warehouses and Item (2:45–4:00)
 
-🖥 Go to **Stock → Warehouse → New**.
-- Warehouse Name: `Main Store`
-- Company: ABC Manufacturing Pvt. Ltd.
-- Save.
+🏷 *ERPNext: Warehouse + Item (Maintain Stock)*
 
-🎙 "First, the warehouse. A warehouse in ERPNext is any location where you keep stock: a store, a rack, a factory floor, or even a branch.
+🖥 **Stock → Warehouse → New**: `Main Store`, company ABC Manufacturing Pvt. Ltd. → Save. Repeat for `Rack B`.
+🖥 **Stock → Item → New**: Item Code `Steel Rod 10mm`, Item Group Raw Material, UOM Nos, check **Maintain Stock**, Valuation Rate 500 → Save.
 
-I create a warehouse called Main Store under my company. Notice that ERPNext adds the company abbreviation at the end of the name. This helps when you have multiple companies."
+🎙 "First, two warehouses: Main Store and Rack B. A warehouse in ERPNext is any location where you keep stock: a store, a rack, a factory floor, or a branch.
 
-### Step 2 – Create the Item (5:45–6:45)
+Now the item: Steel Rod 10mm, Item Group Raw Material, unit Nos. The key checkbox is Maintain Stock. If it is off, ERPNext will not track quantity. And I add a valuation rate of 500 rupees, so ERPNext can calculate the stock value."
 
-🖥 Go to **Stock → Item → New**.
-- Item Code: `Steel Rod 10mm`
-- Item Group: Raw Material
-- Unit of Measure: Nos
-- Check **Maintain Stock**
-- Valuation Rate: 500
-- Save.
+### Step 2 – Opening Stock and Receipt: System Shows 100 (4:00–5:00)
 
-🎙 "Now the item. Item Code is Steel Rod 10mm. Item Group is Raw Material. Unit of Measure is Nos.
+🏷 *ERPNext: Stock Reconciliation (Opening Stock) + Stock Entry (Material Receipt)*
 
-The most important checkbox here is Maintain Stock. If this is not checked, ERPNext will not track the quantity of this item. For anything you want to count in your warehouse, keep it checked.
+🖥 **Stock → Stock Reconciliation → New**: Purpose **Opening Stock**, Steel Rod 10mm, Main Store - ABC, Qty 60, Rate 500 → **Submit**.
+🖥 **Stock → Stock Entry → New**: type **Material Receipt**, target Main Store - ABC, Qty 40, Basic Rate 500 → **Submit**. Open the item's Stock dashboard: **100**.
 
-I'm also adding a valuation rate of 500 rupees. ERPNext needs this to calculate the value of your stock."
+🎙 "I add 60 pieces as opening stock, using Stock Reconciliation with the purpose Opening Stock. Then 40 pieces arrive, and I record them with a Stock Entry of type Material Receipt. In real life, supplier purchases go through Purchase Receipt, but this is the quickest way to show the movement.
 
-### Step 3 – Add Opening Stock (6:45–7:45)
+Remember: nothing changes until the document is submitted. Saving is not enough.
 
-🖥 Go to **Stock → Stock Reconciliation → New**.
-- Purpose: **Opening Stock**
-- Item: Steel Rod 10mm, Warehouse: Main Store - ABC, Quantity: 60, Valuation Rate: 500
-- Submit.
+Now the system shows 100 pieces in Main Store."
 
-🎙 "Now I need to tell ERPNext how much stock I already have today. For this, I use Stock Reconciliation with the purpose Opening Stock.
+### Step 3 – The Gap Is Found (5:00–5:20)
 
-I add my item, select Main Store, quantity 60, rate 500. Then I submit.
+🏷 *Use case: physical count = 80*
 
-Remember this: nothing affects your stock until the document is submitted. Saving is not enough."
+🖥 Slide: "System 100 | Physical 80 | Difference −20 = −₹10,000".
 
-### Step 4 – Make a Stock Entry (7:45–8:45)
+🎙 "The store manager counts the shelf: 80. The system says 100. A difference of 20 pieces, worth 10,000 rupees. Let's fix it the right way."
 
-🖥 Go to **Stock → Stock Entry → New**.
-- Stock Entry Type: **Material Receipt**
-- Target Warehouse: Main Store - ABC
-- Item: Steel Rod 10mm, Qty: 40, Basic Rate: 500
-- Submit.
-- Open the Item → show **Stock** dashboard showing 100.
+### Step 4 – Fix It: Stock Reconciliation (5:20–7:00)
 
-🎙 "Now, let's say 40 more rods arrived from a supplier. I'll record it using a Stock Entry of type Material Receipt.
+🏷 *ERPNext: Stock Reconciliation → corrects stock and accounts together*
 
-In practice, you would normally use Purchase Receipt for supplier purchases. But Stock Entry is the simplest way to show the movement in this demo.
-
-After I submit, the item shows 100 pieces in Main Store. This is what the **system** says: 100.
-
-Stock Entry also supports Material Issue to give material out, and Material Transfer to move between warehouses. Every one of these creates a Stock Ledger entry."
-
-### Step 5 – The Problem: Physical Count Shows 80 (8:45–9:15)
-
-🖥 *Cut to a photo or slide: "Physical count: 80".*
-
-🎙 "Now the store manager does a physical count. He walks to the shelf, counts carefully, and finds only 80 pieces.
-
-System: 100. Physical: 80. A difference of 20 pieces, which is worth 10,000 rupees at our rate.
-
-Now we fix this the right way."
-
-### Step 6 – Run Stock Reconciliation (9:15–10:30)
-
-🖥 Go to **Stock → Stock Reconciliation → New**.
-- Purpose: **Stock Reconciliation**
-- Item: Steel Rod 10mm, Warehouse: Main Store - ABC
-- Click the row; ERPNext shows **Current Qty: 100**
-- Set **Quantity: 80**, keep Valuation Rate: 500
-- Show **Difference Amount: −10,000**
-- Check Difference Account (Stock Adjustment)
-- Submit.
-- Open **Accounting Ledger** from the submitted document (View → Stock Ledger / Accounting Ledger).
+🖥 **Stock Reconciliation → New**: Purpose **Stock Reconciliation**. Add item and warehouse; ERPNext shows **Current Qty 100**. Enter **Quantity 80**, Valuation Rate 500. Show **Difference Amount −10,000** and the Difference Account (Stock Adjustment) → **Submit**. Open the ledgers from the submitted document.
 
 🎙 "I create a new Stock Reconciliation, this time with the purpose Stock Reconciliation, not Opening Stock.
 
-I select the item and warehouse. Look here: ERPNext shows the current quantity, 100. In the quantity column I enter what I actually counted: 80.
+I select the item and warehouse. ERPNext shows the current quantity: 100. I enter the counted quantity: 80.
 
-Now see the difference amount at the bottom: minus 10,000 rupees. That's the value of the missing stock.
+Look at the difference amount: minus 10,000 rupees. That is the value of the missing stock. And look at the Difference Account: Stock Adjustment.
 
-ERPNext posts this to the Stock Adjustment account. When I submit, two things happen. The stock becomes 80. And the accounts record a loss of 10,000.
+When I submit, two things happen together. The stock becomes 80. And the accounts record a 10,000-rupee loss in Stock Adjustment.
 
-This is important. Your stock and your finance are always connected. You cannot fix quantity without the value showing up in your books, and that is exactly how it should be.
+This is the real strength of ERPNext. Stock and accounts are connected. You cannot fix the quantity without the value showing up in your books.
 
-Also, use Stock Reconciliation carefully. Do it only after a real physical count, and keep a record of who counted."
+One rule: use Stock Reconciliation only after a real physical count, and keep a record of who counted."
 
-### Step 7 – Set the Reorder Level (10:30–11:30)
+### Step 5 – Prevent It: The Three Stock Entries (7:00–9:30)
 
-🖥 Open the Item → scroll to **Reorder** section → add row:
-- Warehouse: Main Store - ABC
-- Reorder Level: 50
-- Reorder Qty: 100
-- Material Request Type: Purchase
-- Save.
-- Then open **Stock → Stock Settings** and show **Auto Create Material Request**.
+🏷 *Now we prevent the same problem. Each cause has its own ERPNext document.*
 
-🎙 "Now let's make sure we never run out. Open the item and go to the Reorder section.
+🎙 "Fixing the number is only half of the solution. Now let's make sure it does not happen again. Remember our three causes? Each one has its own ERPNext document. Let's do all three."
 
-I add the warehouse, Main Store. Reorder Level: 50. Reorder Quantity: 100. And Material Request Type: Purchase.
+#### 5A – Issued to Production → Material Issue (7:00–7:45)
 
-This means: when stock in Main Store falls to 50 or below, ERPNext should raise a request to buy 100 more.
+🏷 *Cause: material issued, no entry → ERPNext: Material Issue*
 
-For this to happen automatically, go to Stock Settings and enable Auto Create Material Request. ERPNext then creates a draft Material Request through its scheduler, so your purchase team gets an automatic alert.
+🖥 **Stock Entry → New**: type **Material Issue**, source warehouse Main Store - ABC, Steel Rod 10mm, Qty **10** → Submit. Stock: 70.
 
-You can also see the shortage anytime from the Stock Projected Qty report."
+🎙 "Cause one: material goes to production with no entry. Now the store keeper makes a Stock Entry of type Material Issue. Source warehouse Main Store, quantity 10. Submit. Stock is 70.
 
----
+If you run manufacturing in ERPNext, this same movement is done through a Work Order and Material Transfer for Manufacturing, so the issue is linked to a production order. We will cover that in the manufacturing series."
 
-## Part 7 – Reports (11:30–12:30)
+#### 5B – Damaged Material → Material Issue with Reason (7:45–8:30)
 
-### Stock Ledger (11:30–11:55)
+🏷 *Cause: damaged, never recorded → ERPNext: Material Issue + reason*
 
-🖥 Open **Stock → Reports → Stock Ledger**. Filter: Item = Steel Rod 10mm.
+🖥 **Stock Entry → New**: type **Material Issue**, Main Store - ABC, Qty **2**, expense account Stock Adjustment (or your damage/wastage account), remarks "Damaged during handling" → Submit. Stock: 68.
 
-🎙 "Now the reports. First, Stock Ledger. This shows every movement of this item: the opening stock of 60, the receipt of 40, and the reconciliation that reduced 20.
+🎙 "Cause two: damaged material. Same Material Issue, quantity 2, and I write the reason in the remarks: damaged during handling. The cost goes to an expense account, so management can see how much money is lost to damage every month.
 
-You can see the date, the voucher type, the voucher number, and the balance after every entry. If anyone asks 'Why is the stock 80?', this report gives the full answer."
+Now damage is no longer invisible. It is a number in your reports."
 
-### Stock Balance (11:55–12:30)
+#### 5C – Moved to Another Rack → Material Transfer (8:30–9:30)
 
-🖥 Open **Stock → Reports → Stock Balance**. Filter by Warehouse.
+🏷 *Cause: moved, no transfer entry → ERPNext: Material Transfer*
 
-🎙 "Next, Stock Balance. This gives you a snapshot: item by item, warehouse by warehouse, quantity and value.
+🖥 **Stock Entry → New**: type **Material Transfer**, source Main Store - ABC, target Rack B - ABC, Qty **5** → Submit. Main Store 68, Rack B 5.
 
-This is the report your manager will open every week. Quantity: 80. Value: 40,000 rupees."
+🎙 "Cause three: material moved to another rack. We use Stock Entry of type Material Transfer. Source: Main Store. Target: Rack B. Quantity 5.
 
----
+Look at the result. Main Store has 68. Rack B has 5. The total is 73, and nothing was lost. The material just moved, and ERPNext knows exactly where it is.
 
-## Part 8 – Real-World Tips (12:30–13:15)
+This is the principle: every physical movement gets a document. If the box moves, the entry moves with it."
 
-🖥 *Show a text slide with 4 bullets.*
+### Step 6 – Reorder Level: Alert Before Stock Ends (9:30–10:30)
 
-🎙 "Before we finish, here are four tips that I follow when implementing this for clients:
+🏷 *ERPNext: Reorder Level + Auto Material Request*
 
-One. Always record movements through documents. Never edit the stock directly.
+🖥 Open the Item → **Reorder** section → add row: Warehouse Main Store - ABC, Reorder Level 50, Reorder Qty 100, Material Request Type Purchase → Save. Open **Stock → Stock Settings** and show **Auto Create Material Request**. Optionally show **Stock Projected Qty**.
 
-Two. Do a cycle count regularly: count a few important items every week, instead of everything once a year.
+🎙 "Now, the alert. Open the item and go to the Reorder section. Warehouse: Main Store. Reorder Level: 50. Reorder Quantity: 100. Type: Purchase.
 
-Three. Keep Allow Negative Stock disabled in Stock Settings, so nobody can issue material that does not exist in the system.
+It means: when stock in Main Store falls to 50 or below, ERPNext should raise a request to buy 100 more.
 
-And four. After every reconciliation, find out why the difference happened. Fixing the number is easy. Fixing the habit is what really protects your business."
+For automatic requests, enable Auto Create Material Request in Stock Settings. ERPNext's scheduler then creates a draft Material Request for your purchase team.
 
----
+You can also check the shortage anytime in the Stock Projected Qty report."
 
-## Part 9 – How I Can Help (13:15–14:00)
+### Step 7 – Proof: Stock Ledger and Stock Balance (10:30–11:45)
 
-🖥 *Show a slide with 4 bullets: Setup, Migration, Training, Custom Reports.*
+🏷 *ERPNext: Stock Ledger + Stock Balance*
 
-🎙 "If your company is facing this problem, here is how I can help:
+🖥 **Stock → Reports → Stock Ledger**, filter Item = Steel Rod 10mm. Then **Stock Balance**, filter by warehouse.
 
-- I can set up your items, warehouses, and stock structure in ERPNext.
-- I can migrate your opening stock from Excel safely.
-- I can train your store team so that every movement is recorded.
-- And I can build custom reports and alerts, for example a daily low-stock email to your purchase manager.
+🎙 "Finally, the proof. In the Stock Ledger, filter the item. You can see every movement: opening stock 60, receipt 40, the reconciliation minus 20, the issue of 10, the damage of 2, and the transfer of 5. Each line shows the date, document number, and the balance after it.
 
-Contact details are in the description."
+If the owner asks, 'Why is the stock 68?', this report answers in ten seconds.
+
+Now the Stock Balance. Main Store: 68 pieces, 34,000 rupees. Rack B: 5 pieces, 2,500 rupees. Total: 73 pieces, 36,500 rupees. This is the report your manager can open every week."
 
 ---
 
-## Part 10 – Summary and Closing (14:00–14:30)
+## Part 5 – Best Practices and How I Can Help (11:45–12:45)
 
-🎙 "Let's quickly recap.
+🖥 Slide 1: three bullets. Slide 2: four bullets (Setup, Migration, Training, Custom Reports).
 
-Stock mismatch happens when physical movement and system entry are not in sync.
+🎙 "Three tips that I use when implementing this for clients:
 
-In ERPNext, we create warehouses and items, record movements through Stock Entry, correct differences through Stock Reconciliation, set Reorder Levels for alerts, and verify everything through Stock Ledger and Stock Balance.
+One. Never edit stock directly. Every movement must be a document.
 
-If this video helped you, please like it and subscribe to the channel. Comment below and tell me your industry and your biggest stock problem. I'll cover it in a coming video.
+Two. Do cycle counts: count a few important items every week instead of the whole warehouse once a year. And keep Allow Negative Stock off in Stock Settings, so nobody can issue material that is not in the system.
 
-In the next video, we'll solve the problem of late invoices and late payments using the ERPNext sales cycle. See you there. Thank you."
+Three. After every reconciliation, find out why the difference happened. Fixing the number is easy. Fixing the habit protects your business.
+
+If your company has this problem, here is how I can help. I can set up your items, warehouses, and stock structure. I can migrate your opening stock from Excel safely. I can train your store team on Stock Entry and Reconciliation. And I can build custom alerts, like a daily low-stock email to your purchase manager. Contact details are in the description."
+
+---
+
+## Part 6 – Summary and Closing (12:45–13:15)
+
+🎙 "Quick recap. The use case: record 100, shelf 80, caused by three unrecorded movements.
+
+The ERPNext solution: Stock Entry for every movement, Warehouses for locations, Stock Reconciliation to correct after a count, Reorder Level for alerts, and Stock Ledger and Stock Balance for proof.
+
+If this helped, please like and subscribe. Comment your industry and your biggest stock problem, and I'll make a video on it.
+
+Next video: late invoices and late payments, solved with the ERPNext sales cycle. See you there."
 
 ---
 
@@ -310,40 +260,35 @@ Stock Mismatch Problem? Fix It with ERPNext Stock Reconciliation
 
 ### Thumbnail
 - **Main text:** `STOCK MISMATCH? FIXED`
-- **Layout idea:** left side, a red "100" crossed out and a green "80"; right side, your face and the ERPNext screen
+- **Layout idea:** left, a red crossed-out "100" and a green "80"; right, your face and the ERPNext screen
 - **Colors:** red for problem, green for solution, white bold text
 
 ### Description
 
 ```text
-Your system says 100 items, but the shelf has 80. Who is responsible and how do you fix it?
+Your system says 100 items, but the shelf has 80. Twenty pieces are missing. Who is responsible and how do you fix it?
 
-In this video, I explain how ERPNext tracks stock warehouse-wise, finds mismatches, and alerts you before stock runs out. We use a real business story and a complete live demo.
+In this video, I explain a real manufacturing use case and show the complete ERPNext solution: how to record every stock movement, correct stock after a physical count, set reorder alerts, and prove every movement with reports.
 
-What you will learn:
-- Why stock mismatches happen
-- How to create Warehouses and Items in ERPNext
-- How to add opening stock
-- How to use Stock Entry
-- How to correct stock using Stock Reconciliation
-- How to set Reorder Level
-- How to read Stock Ledger and Stock Balance reports
+ERPNext features covered:
+- Warehouse and Item (Maintain Stock)
+- Stock Reconciliation (opening stock and physical count correction)
+- Stock Entry: Material Receipt, Material Issue, Material Transfer
+- Reorder Level and Auto Create Material Request
+- Stock Ledger, Stock Balance, and Stock Projected Qty reports
 
 Chapters:
-0:00 The problem
-0:30 What you will learn
-1:30 Business story
-3:00 What the solution should do
-4:00 ERPNext Stock module
-5:00 Demo: Warehouse and Item
-6:45 Demo: Opening stock
-7:45 Demo: Stock Entry
-9:15 Demo: Stock Reconciliation
-10:30 Demo: Reorder Level
-11:30 Stock Ledger and Stock Balance reports
-12:30 Real-world tips
-13:15 How I can help
-14:00 Summary and next video
+0:00 The problem: 100 vs 80
+0:30 The use case
+1:15 The ERPNext solution map
+2:45 Demo: Warehouses and Item
+4:00 Demo: Opening stock and receipt
+5:20 Demo: Fix with Stock Reconciliation
+7:00 Demo: Prevent with Stock Entry (Issue, Damage, Transfer)
+9:30 Demo: Reorder Level
+10:30 Stock Ledger and Stock Balance
+11:45 Best practices and how I can help
+12:45 Summary and next video
 
 Need help implementing ERPNext for your business?
 Contact: [your email / WhatsApp / LinkedIn]
@@ -353,13 +298,13 @@ Playlist: Business Problems Solved with ERPNext & Frappe
 #ERPNext #StockManagement #Inventory #Warehouse #Frappe #ERP
 ```
 
-### Tags (YouTube tag field)
-erpnext stock reconciliation, erpnext stock management, erpnext inventory tutorial, stock mismatch, erpnext warehouse, erpnext reorder level, stock ledger erpnext, stock balance report, frappe erpnext tutorial, erpnext for beginners
+### Tags
+erpnext stock reconciliation, erpnext stock management, erpnext inventory tutorial, erpnext stock entry, erpnext material transfer, erpnext material issue, stock mismatch, erpnext reorder level, stock ledger erpnext, frappe erpnext tutorial, erpnext for beginners
 
 ### Pinned Comment
 
 ```text
-What is your biggest stock problem: mismatch, theft, or late purchasing? Comment your industry and I'll make a video on it. 👇
+What is your biggest stock problem: mismatch, damage, or late purchasing? Comment your industry and I'll make a video on it. 👇
 ```
 
 ---
@@ -369,19 +314,19 @@ What is your biggest stock problem: mismatch, theft, or late purchasing? Comment
 ### Short 1 – "100 vs 80" (30 sec)
 🎙 "System says 100. Shelf says 80. Don't edit the stock directly. In ERPNext, open Stock Reconciliation, enter the physical count, and submit. The stock is corrected, and the 10,000-rupee loss is posted to your books automatically."
 
-### Short 2 – Reorder Level (30 sec)
-🎙 "Never run out of stock again. Open your item, go to Reorder, set Reorder Level 50 and Reorder Quantity 100. Enable Auto Create Material Request in Stock Settings. ERPNext will now alert your purchase team before stock ends."
+### Short 2 – Three Causes, Three Documents (30 sec)
+🎙 "Material to production: Material Issue. Damaged material: Material Issue with a reason. Moved to another rack: Material Transfer. Three causes of stock mismatch, three ERPNext Stock Entries."
 
-### Short 3 – Stock Ledger (30 sec)
-🎙 "Who changed the stock? ERPNext's Stock Ledger shows every movement: date, document, quantity, and balance. Open it for any item and the full story is there."
+### Short 3 – Reorder Level (30 sec)
+🎙 "Never run out of stock. Open your item, go to Reorder, set Reorder Level 50 and Reorder Quantity 100. Enable Auto Create Material Request in Stock Settings. ERPNext alerts your purchase team before stock ends."
 
 ---
 
 ## Post-Recording Checklist
 
-- [ ] Add chapters to the description with the exact timestamps from the final edit
-- [ ] Zoom into the screen during key clicks (Current Qty, Difference Amount)
-- [ ] Add on-screen text for "Submit the document" and "Maintain Stock"
+- [ ] Update chapter timestamps from the final edit
+- [ ] Add the 🏷 tags as lower-third text in the editor (use case → ERPNext feature)
+- [ ] Zoom into the screen at key moments (Current Qty, Difference Amount, Stock Ledger)
 - [ ] Add the end screen with the next video (V02) and the playlist
 - [ ] Export 3 Shorts
-- [ ] Verify menu names and fields against your ERPNext version, since labels can differ slightly between versions
+- [ ] Verify menu names, fields, and the expense account on Material Issue against your ERPNext version
